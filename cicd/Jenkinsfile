@@ -1,14 +1,15 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage('build'){
-            agent{
-                docker{
+    stages {
+        stage('Build') {
+            agent {
+                docker {
                     image 'node:22.19.0-alpine'
                     reuseNode true
+                    args '--volumes-from jenkins'
                 }
             }
-            steps{
+            steps {
                 sh '''
                     ls -la
                     node --version
@@ -19,20 +20,20 @@ pipeline{
                 '''
             }
         }
-    }
-}
-
-        stage('Test'){
-            agent{
-                docker{
+        stage('Test') {
+            agent {
+                docker {
                     image 'node:22.19.0-alpine'
                     reuseNode true
+                    args '--volumes-from jenkins'
                 }
             }
-            steps{
+            steps {
                 sh '''
                     test -f build/index.html
-                    npm test
+                    CI=true npm test
                 '''
             }
         }
+    }
+}
