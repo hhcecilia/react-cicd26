@@ -6,7 +6,7 @@ pipeline {
                 docker {
                     image 'node:22.19.0-alpine'
                     reuseNode true
-                    args '--volumes-from jenkins'
+                    args '-v jenkins-data:/var/jenkins_home'
                 }
             }
             steps {
@@ -25,7 +25,7 @@ pipeline {
                 docker {
                     image 'node:22.19.0-alpine'
                     reuseNode true
-                    args '--volumes-from jenkins'
+                    args '-v jenkins-data:/var/jenkins_home'
                 }
             }
             steps {
