@@ -7,6 +7,9 @@ services:
       dockerfile: Dockerfile.jenkins
     container_name: jenkins
     restart: on-failure
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "8080:8080"
       - "50000:50000"
