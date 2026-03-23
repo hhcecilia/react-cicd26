@@ -44,7 +44,7 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'reactAppcicd']]) {
+                withCredentials([usernamePassword(credentialsId: 'reactAppcicd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh '''
                         aws --version
                         aws s3 ls
