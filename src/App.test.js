@@ -4,7 +4,7 @@ import App from './App';
 
 test('renders the main heading', () => {
   render(<App />);
-  const heading = screen.getByText(/React CI\/CD with Docker & Jenkins/i);
+  const heading = screen.getByText(/This is react cicd - AWS/i);
   expect(heading).toBeInTheDocument();
 });
 
