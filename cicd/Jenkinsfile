@@ -44,7 +44,9 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withCredentials([usernamePassword(credentialsId: 'reactcicdtemp', passwordVariable: 'WS_SECRET_ACCESS_KEY', usernameVariable: 'WS_ACCESS_KEY_ID')]) {
+                // some block
+}
                     sh '''
                         aws --version
                         aws s3 ls
