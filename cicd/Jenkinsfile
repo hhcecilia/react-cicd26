@@ -1,41 +1,39 @@
 pipeline {
     agent any
     stages {
-        //stage('Build') {
-        //    agent {
-        //        docker {
-        //            image 'node:22.19.0-alpine'
-        //            reuseNode true
-        //            args '-v jenkins-data:/var/jenkins_home'
-        //        }
-        //    }
-        //    steps {
-        //        sh '''
-        //            ls -la
-        //            node --version
-        //            npm --version
-        //            npm install
-        //            npm run build
-        //            ls -la
-        //        '''
-        //    }
-        //}
-        //stage('Test') {
-        //    agent {
-        //        docker {
-        //            image 'node:22.19.0-alpine'
-        //            reuseNode true
-        //            args '-v jenkins-data:/var/jenkins_home'
-        //        }
-        //    }
-        //    steps {
-        //        sh '''
-        //            test -f build/index.html
-        //            CI=true npm test
-        //        '''
-        //    }
-        //}
-        stage('AWS') {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'node:22.19.0-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la
+                '''
+            }
+        }
+        stage('Test') {
+            agent {
+                docker {
+                    image 'node:22.19.0-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    test -f build/index.html
+                    CI=true npm test
+                '''
+            }
+        }
+        stage('Deploy to S3') {
             agent {
                 docker {
                     image 'amazon/aws-cli:2.34.14'
@@ -47,7 +45,7 @@ pipeline {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh '''
                         aws --version
-                        aws s3 ls
+                        aws s3 sync build s3://reactcicd26 --delete
                     '''
                 }
             }
