@@ -45,11 +45,13 @@ pipeline {
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'reactcicdtemp', passwordVariable: 'WS_SECRET_ACCESS_KEY', usernameVariable: 'WS_ACCESS_KEY_ID')]) {
-                // some block
+                // this block will have access to the AWS credentials as environment variables WS_ACCESS_KEY_ID and WS_SECRET_ACCESS_KEY
 }
                     sh '''
                         aws --version
                         aws s3 ls
+                        echo "Hello, s3" > index.html
+                        aws s3 cp index.html s3://reactcicd26/index.html
                     '''
                 }
             }
