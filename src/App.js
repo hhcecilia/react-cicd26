@@ -4,7 +4,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>React CI/CD with Docker & Jenkins</h1>
+        <h1>This is react cicd - AWS</h1>
         <p>Pipeline is running!</p>
       </header>
     </div>
