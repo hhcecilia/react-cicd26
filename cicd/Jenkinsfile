@@ -72,16 +72,15 @@ pipeline {
                 docker {
                     image 'amazon/aws-cli:2.34.14'
                     reuseNode true
-                    args 'u root --entrypoint=""'
+                    args '--entrypoint=""'
                 }
             }
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh '''
                         sed -i "s|IMAGE_PLACEHOLDER|$ECR_REPO:$BUILD_NUMBER|g" cicd/aws/task-definition.json
-                        aws ecs register-task-definition --cli-input-json file://cicd/aws/task-definition.json 
-                        --region $AWS_DEFAULT_REGION
-                        aws ecs update-service --cluster reactcicd-cluster --service reactcicd-service  --task-definition reactcicd-task --desired-count 1 --force-new-deployment --region us-east-1
+                        aws ecs register-task-definition --cli-input-json file://cicd/aws/task-definition.json --region $AWS_DEFAULT_REGION
+                        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition reactcicd-task --desired-count 1 --force-new-deployment --region $AWS_DEFAULT_REGION
                     '''
                 }
             }
