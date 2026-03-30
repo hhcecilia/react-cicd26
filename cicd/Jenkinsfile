@@ -39,7 +39,7 @@ pipeline {
                 '''
             }
         }
-        stage('Build and Push to ECR') {
+        stage('Build My Docker Image') {
             steps {
                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh '''
@@ -50,7 +50,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to S3') {
+        stage('Deploy to AWS') {
             agent {
                 docker {
                     image 'amazon/aws-cli:2.34.14'
