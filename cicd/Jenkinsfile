@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+        ECR_REPO = '268769775545.dkr.ecr.us-east-1.amazonaws.com/reactcicd26'
+        ECS_CLUSTER = 'reactcicd-cluster'
+        ECS_SERVICE = 'reactcicd-service'
+    }
     stages {
         stage('Build') {
             agent {
@@ -33,6 +39,17 @@ pipeline {
                 '''
             }
         }
+        stage('Build and Push to ECR') {
+            steps {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh '''
+                        docker run --rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY --entrypoint="" amazon/aws-cli:2.34.14 aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
+                        docker build -t $ECR_REPO:$BUILD_NUMBER .
+                        docker push $ECR_REPO:$BUILD_NUMBER
+                    '''
+                }
+            }
+        }
         stage('Deploy to S3') {
             agent {
                 docker {
@@ -46,6 +63,24 @@ pipeline {
                     sh '''
                         aws --version
                         aws s3 sync build s3://reactcicd26 --delete
+                    '''
+                }
+            }
+        }
+        stage('Deploy to ECS') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:2.34.14'
+                    reuseNode true
+                    args '--entrypoint=""'
+                }
+            }
+            steps {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'reactAppcicd', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh '''
+                        sed -i "s|IMAGE_PLACEHOLDER|$ECR_REPO:$BUILD_NUMBER|g" cicd/aws/task-definition.json
+                        aws ecs register-task-definition --cli-input-json file://cicd/aws/task-definition.json --region $AWS_DEFAULT_REGION
+                        aws ecs update-service --cluster reactcicd-cluster --service reactcicd-service  --task-definition reactcicd-task --desired-count 1 --force-new-deployment --region us-east-1
                     '''
                 }
             }
